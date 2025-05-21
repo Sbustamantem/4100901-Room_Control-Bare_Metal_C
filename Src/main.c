@@ -15,12 +15,11 @@
 void heartbeat_led_toggle(void)
 {
     static uint32_t last_tick = 0;
-    if (systick_get_tick() - last_tick >= 500) { // Cambia cada 500 ms
+    if (systick_get_tick() - last_tick >= 1000) { // Cambia cada 1s
         gpio_toggle_pin(HEARTBEAT_LED_PORT, HEARTBEAT_LED_PIN);
         last_tick = systick_get_tick();
     }
 }
-
 /**
  * @brief Función principal del programa.
  *        Configura los periféricos y entra en un bucle infinito.
@@ -40,14 +39,14 @@ int main(void)
     // Botón B1
     gpio_setup_pin(GPIOC, 13, GPIO_MODE_INPUT, 0);
     nvic_exti_pc13_button_enable();
-
+    
     // USART2
     uart2_init(115200);
     nvic_usart2_irq_enable();
 
     // TIM3 Canal 1 para PWM
     tim3_ch1_pwm_init(1000); // ej. 1000 Hz
-    tim3_ch1_pwm_set_duty_cycle(70); // ej. 50%
+    tim3_ch1_pwm_set_duty_cycle(50); // ej. 50%
 
     // Inicialización de la Lógica de la Aplicación (room_control)
     room_control_app_init();
@@ -56,6 +55,7 @@ int main(void)
     uart2_send_string("\r\nSistema Inicializado. Esperando eventos...\r\n");
     while (1) {
         heartbeat_led_toggle();
+        ON_OFF_led_toggle();
     }
 }
 

@@ -75,6 +75,7 @@ void EXTI15_10_IRQHandler(void) {
         // 2. Limpiar el flag de pendiente de la interrupción (escribiendo '1')
         EXTI->PR1 |= (1U << 13);
         // 3. Procesar boton presionado
+        room_control_on_button_press();
     }
 }
 

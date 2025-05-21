@@ -29,4 +29,6 @@ void room_control_on_uart_receive(char received_char);
  */
 void room_control_app_init(void);
 
+void ON_OFF_led_toggle(void);
+
 #endif // ROOM_CONTROL_H
