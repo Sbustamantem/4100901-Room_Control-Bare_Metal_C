@@ -11,42 +11,40 @@
 #include "systick.h" // Para obtener ticks y manejar retardos/tiempos
 #include "uart.h"    // Para enviar mensajes
 #include "tim.h"     // Para controlar el PWM
-
+//Contros Variables 
 static volatile uint32_t press_time = 0;
 volatile uint32_t tup_time = 0;
 volatile uint32_t duty_value = 0;
 
 void room_control_app_init(void)
 {   
-   gpio_write_pin(EXTERNAL_LED_ONOFF_PORT,EXTERNAL_LED_PWM_PIN,GPIO_PIN_RESET);
-// Inicializar variables de estado si es necesario.
-    // Por ejemplo, asegurar que los LEDs estén apagados al inicio
-
-    // tim3_ch1_pwm_set_duty_cycle(50); // Establecer un duty cycle inicial para el PWM LED
+   gpio_write_pin(EXTERNAL_LED_ONOFF_PORT,EXTERNAL_LED_ONOFF_PIN,GPIO_PIN_RESET);
+// Ensures That External Led ON/OFF Is Set To OFF
 }
 
-void room_control_on_button_press(void)
+void room_control_on_button_press(void) //Actions To Do After Button Press Interruption
 {
-    // TODO: Implementar anti-rebote
+    // Debounce
     if ((systick_get_tick() - press_time) < 200){return;}
-
     press_time = systick_get_tick();
+    //Turns ON The ON/OFF Led And Gets The Time When Its Done
     gpio_write_pin(EXTERNAL_LED_ONOFF_PORT,EXTERNAL_LED_ONOFF_PIN,GPIO_PIN_SET);
     tup_time = systick_get_tick();
     uart2_send_string("Boton B1: Presionado.\r\n");
-    // TODO: Procesar la presion para realizar acciones
+    
     }
 
-
+//Uart Character Interpretation
 void room_control_on_uart_receive(char received_char)
 { switch (received_char)
+//Handles Duty Cycle, And Toggles ON/OFF LED Acording To Recived Chr
 {
 case 'D':
     duty_value+= 10;    
     break;
 case 'd':
-    if (duty_value < 10) {duty_value = 100; return;}
-    duty_value-= 10;
+    if (duty_value < 10) {duty_value = 100;}
+    else{duty_value-= 10;}
     break;
 case 'R':
     duty_value = 0;
@@ -55,6 +53,14 @@ case 'R':
 case 'S':
     duty_value = 100;
     uart2_send_string("PWM Duty Set To 100\r\n");
+    break;
+case 's':
+    gpio_write_pin(EXTERNAL_LED_ONOFF_PORT,EXTERNAL_LED_ONOFF_PIN,GPIO_PIN_SET);
+    uart2_send_string("Led ON/OFF Set To ON\r\n");
+    break;
+case 'r':
+    gpio_write_pin(EXTERNAL_LED_ONOFF_PORT,EXTERNAL_LED_ONOFF_PIN,GPIO_PIN_RESET);
+    uart2_send_string("Led ON/OFF Set To OFF\r\n");
     break;
     default:
     uart2_send_string("Comando Desconocido\r\n");
@@ -65,17 +71,13 @@ case 'S':
 tim3_ch1_pwm_set_duty_cycle(duty_value);
 
  }
-    // TODO: Procesar el carácter para realizar acciones
-    // Ejemplo: si recibe 'h' o 'H', encender el LED PWM al 100%.
-    //          si recibe 'l' o 'L', apagar el LED PWM (0%).
-    //          si recibe 't', hacer toggle del LED ON/OFF.
 
-
+//3 Seconds After Last Press Check Using The Time Gotten From Button Press
 void ON_OFF_led_toggle(void)
 { 
  if ((tup_time != 0 && (systick_get_tick() - tup_time) >= 3000) ) 
     {gpio_write_pin(EXTERNAL_LED_ONOFF_PORT,EXTERNAL_LED_ONOFF_PIN,GPIO_PIN_RESET);
-    uart2_send_string("Led Apagado\r\n");
+    uart2_send_string("Ext Led ON/OFF Apagado\r\n");
     tup_time = 0;
      } 
 }

@@ -12,6 +12,7 @@
 #include "tim.h"
 #include "room_control.h"
 
+//Function To Handle Heartbeat
 void heartbeat_led_toggle(void)
 {
     static uint32_t last_tick = 0;
@@ -28,7 +29,7 @@ void heartbeat_led_toggle(void)
 int main(void)
 {
     // Inicialización de SysTick
-    systick_init_1ms(); // Utiliza SYSCLK_FREQ_HZ (ej. 4MHz) de rcc.h
+    systick_init_1ms(); // Utiliza SYSCLK_FREQ_HZ (set at 4MHz) de rcc.h
 
     // LED Heartbeat
     gpio_setup_pin(GPIOA, HEARTBEAT_LED_PIN, GPIO_MODE_OUTPUT, 0);
@@ -45,17 +46,18 @@ int main(void)
     nvic_usart2_irq_enable();
 
     // TIM3 Canal 1 para PWM
-    tim3_ch1_pwm_init(1000); // ej. 1000 Hz
-    tim3_ch1_pwm_set_duty_cycle(50); // ej. 50%
+    tim3_ch1_pwm_init(1000); // set at 1000 Hz
+    tim3_ch1_pwm_set_duty_cycle(50); // base 50%
 
     // Inicialización de la Lógica de la Aplicación (room_control)
     room_control_app_init();
 
-    // Mensaje de bienvenida o estado inicial (puede estar en room_control_app_init o aquí)
+    // Mensaje de bienvenida o estado inicial 
     uart2_send_string("\r\nSistema Inicializado. Esperando eventos...\r\n");
+    //While Cycle For Time Managing Functions 
     while (1) {
         heartbeat_led_toggle();
         ON_OFF_led_toggle();
-    }
+    } 
 }
 
