@@ -18,9 +18,10 @@ void heartbeat_led_toggle(void)
     if (systick_get_tick() - last_tick >= 500) { // Cambia cada 500 ms
         gpio_toggle_pin(HEARTBEAT_LED_PORT, HEARTBEAT_LED_PIN);
         last_tick = systick_get_tick();
+
     }
 }
-
+//a
 /**
  * @brief Función principal del programa.
  *        Configura los periféricos y entra en un bucle infinito.
